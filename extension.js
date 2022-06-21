@@ -32,7 +32,7 @@ function activate(context) {
 			for (let index = 0; index < lineCount; index++) {
 				var line = docs.lineAt(index)
 				if (!line.isEmptyOrWhitespace) {
-					if (line.text.trimStart().startsWith("import") && (line.text.endsWith(".g.dart';") || line.text.endsWith('.g.dart";'))) {
+					if (line.text.trimStart().startsWith("import") && (line.text.trimEnd().endsWith(".g.dart';") || line.text.endsWith('.g.dart";'))) {
 						var filePath = line.text.replace("import", "").replace(";", "").replace("'", "").replace("'", "").replace("./", "").trim()
 						const folders = filePath.split("/")
 						let realPath;
@@ -87,7 +87,8 @@ function activate(context) {
 								if (parameter.startsWith("{")) {
 									console.log("strt {} " + parameter);
 									parameter = parameter.replace("{", "").trimStart().trimEnd()
-									isRoundBracketsStarts = true
+									 isFlowerBracketsStarts = true
+								
 									console.log(parameter);
 
 									if (parameter.endsWith("});")) {
@@ -103,8 +104,45 @@ function activate(context) {
 
 								}
 							}
+						} 
+					} else if(isRoundBracketsStarts){
+						console.log("STart Rounde bra 109");
+
+					let	parameter = line.text.replace("(", "").trimStart()
+					console.log("STart Rounde bra 112");
+						if (parameter.startsWith("{")) {
+							console.log("strt {} " + parameter);
+							parameter = parameter.replace("{", "").trimStart().trimEnd()
+							isFlowerBracketsStarts = true
+							console.log(parameter);
+
+							if (parameter.endsWith("});")) {
+								parameter = parameter.replace("});", "")
+								console.log("ends ", parameter);
+								allParameters = parameter
+								endOfTheParameterSearch = true
+							} else if (parameter.endsWith(")")) {
+								parameter = parameter.replace(")", "")
+								allParameters = parameter
+								endOfTheParameterSearch = true
+							}
+
 						}
-					} else if (line.text.trimStart().startsWith("import")) {
+					}else if(isFlowerBracketsStarts){
+						console.log("STart Rounde bra 132");
+						let	parameter = line.text.trimEnd()
+						if (parameter.endsWith("});")) {
+							parameter = parameter.replace("});", "")
+							console.log("ends ", parameter);
+							allParameters = parameter
+							endOfTheParameterSearch = true
+						} else if (parameter.endsWith(")")) {
+							parameter = parameter.replace(")", "")
+							allParameters = parameter
+							endOfTheParameterSearch = true
+						}         
+					}
+					else if (line.text.trimStart().startsWith("import")) {
 						generateFileOptions.imports.push(line.text)
 					}
 				}
