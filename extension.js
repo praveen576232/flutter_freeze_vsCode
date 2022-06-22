@@ -72,89 +72,94 @@ function activate(context) {
 						}
 						console.log(generateFileOptions);
 
-					} else if (line.text.trimStart().startsWith("const")) {
-						let cons = line.text.trimStart().replace("const", "").trimStart()
-						console.log("start const " + cons);
-						console.log(generateFileOptions.className);
-						if (generateFileOptions.className != null && cons.startsWith("$" + generateFileOptions.className.trim())) {
-							let parameter = cons.replace("$" + generateFileOptions.className.trim(), "").trimStart()
-							console.log("in calss " + parameter);
-							foundClassName = true
-							if (parameter.trimStart() != "" && parameter.startsWith("(")) {
-								console.log("strt ( " + parameter);
-								isRoundBracketsStarts = true
-								parameter = parameter.replace("(", "").trimStart()
-								if (parameter.startsWith("{")) {
-									console.log("strt {} " + parameter);
-									parameter = parameter.replace("{", "").trimStart().trimEnd()
-									 isFlowerBracketsStarts = true
+				 }
+					// else if (line.text.trimStart().startsWith("const")) {
+					// 	let cons = line.text.trimStart().replace("const", "").trimStart()
+					// 	console.log("start const " + cons);
+					// 	console.log(generateFileOptions.className);
+					// 	if (generateFileOptions.className != null && cons.startsWith("$" + generateFileOptions.className.trim())) {
+					// 		let parameter = cons.replace("$" + generateFileOptions.className.trim(), "").trimStart()
+					// 		console.log("in calss " + parameter);
+					// 		foundClassName = true
+					// 		if (parameter.trimStart() != "" && parameter.startsWith("(")) {
+					// 			console.log("strt ( " + parameter);
+					// 			isRoundBracketsStarts = true
+					// 			parameter = parameter.replace("(", "").trimStart()
+					// 			if (parameter.startsWith("{")) {
+					// 				console.log("strt {} " + parameter);
+					// 				parameter = parameter.replace("{", "").trimStart().trimEnd()
+					// 				 isFlowerBracketsStarts = true
 								
-									console.log(parameter);
+					// 				console.log(parameter);
 
-									if (parameter.endsWith("});")) {
-										parameter = parameter.replace("});", "")
-										console.log("ends ", parameter);
-										allParameters = parameter
-										endOfTheParameterSearch = true
-									} else if (parameter.endsWith(")")) {
-										parameter = parameter.replace(")", "")
-										allParameters = parameter
-										endOfTheParameterSearch = true
-									}
+					// 				if (parameter.endsWith("});")) {
+					// 					parameter = parameter.replace("});", "")
+					// 					console.log("ends ", parameter);
+					// 					allParameters = parameter
+					// 					endOfTheParameterSearch = true
+					// 				} else if (parameter.endsWith(")")) {
+					// 					parameter = parameter.replace(")", "")
+					// 					allParameters = parameter
+					// 					endOfTheParameterSearch = true
+					// 				}
 
-								}
-							}
-						} 
-					} else if(isRoundBracketsStarts){
-						console.log("STart Rounde bra 109");
+					// 			}
+					// 		}
+					// 	} 
+					// } else if(isRoundBracketsStarts){
+					// 	console.log("STart Rounde bra 109");
 
-					let	parameter = line.text.replace("(", "").trimStart()
-					console.log("STart Rounde bra 112");
-						if (parameter.startsWith("{")) {
-							console.log("strt {} " + parameter);
-							parameter = parameter.replace("{", "").trimStart().trimEnd()
-							isFlowerBracketsStarts = true
-							console.log(parameter);
+					// let	parameter = line.text.replace("(", "").trimStart()
+					// console.log("STart Rounde bra 112");
+					// console.log(parameter);
+					// 	if (parameter.startsWith("{")) {
+					// 		console.log("strt {} " + parameter);
+					// 		parameter = parameter.replace("{", "").trimStart().trimEnd()
+					// 		isFlowerBracketsStarts = true
+					// 		console.log(parameter);
 
-							if (parameter.endsWith("});")) {
-								parameter = parameter.replace("});", "")
-								console.log("ends ", parameter);
-								allParameters = parameter
-								endOfTheParameterSearch = true
-							} else if (parameter.endsWith(")")) {
-								parameter = parameter.replace(")", "")
-								allParameters = parameter
-								endOfTheParameterSearch = true
-							}
+					// 		if (parameter.endsWith("});")) {
+					// 			parameter = parameter.replace("});", "")
+					// 			console.log("ends ", parameter);
+					// 			allParameters = parameter
+					// 			endOfTheParameterSearch = true
+					// 		} else if (parameter.endsWith(")")) {
+					// 			parameter = parameter.replace(")", "")
+					// 			allParameters = parameter
+					// 			endOfTheParameterSearch = true
+					// 		}
 
-						}
-					}else if(isFlowerBracketsStarts){
-						console.log("STart Rounde bra 132");
-						let	parameter = line.text.trimEnd()
-						if (parameter.endsWith("});")) {
-							parameter = parameter.replace("});", "")
-							console.log("ends ", parameter);
-							allParameters = parameter
-							endOfTheParameterSearch = true
-						} else if (parameter.endsWith(")")) {
-							parameter = parameter.replace(")", "")
-							allParameters = parameter
-							endOfTheParameterSearch = true
-						}         
-					}
+					// 	}
+					// }else if(isFlowerBracketsStarts){
+					// 	console.log("STart Rounde bra 132");
+					// 	let	parameter = line.text.trimEnd()
+					// 	if (parameter.endsWith("});")) {
+					// 		parameter = parameter.replace("});", "")
+					// 		console.log("ends ", parameter);
+					// 		allParameters = parameter
+					// 		endOfTheParameterSearch = true
+					// 	} else if (parameter.endsWith(")")) {
+					// 		parameter = parameter.replace(")", "")
+					// 		allParameters = parameter
+					// 		endOfTheParameterSearch = true
+					// 	}         
+					// }
 					else if (line.text.trimStart().startsWith("import")) {
 						generateFileOptions.imports.push(line.text)
 					}
 				}
 			}
-
-
-
+        console.log(docs.getText());
+			var t = docs.getText().match(RegExp("[^{\}]+(?=})","g"))
+    
+          console.log("t");
+		  console.log(t);
 			//    generateFileOptions.imports = imports
 			console.log(generateFileOptions);
 			if(generateFileOptions.filePath ==null){
 				generateFileOptions.filePath =  `../${vscode.window.activeTextEditor.document.fileName.replace(".dart",".g.dart")}`
 			}
+			 allParameters = t[0];
 			allParameters = allParameters.replace(/ +(?= )/g, '');
 			generateFileOptions.parameters = allParameters.split(",").map((parameter) => {
 				parameter = parameter.trimStart().replace(/ +(?= )/g, '');
