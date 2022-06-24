@@ -7,31 +7,38 @@
  module.exports = function getClassInfo(editor) {
   if (editor == null) return
   let promises = new Promise((resolve, rejects) => {
-    let generateFileOptions = [{}]
+    let generateFileOptions = {}
    
     let allImports = editor.match(/^\s*(?:import)\s+(("|')(package:)?((\.*\/)|(\.*\w+\/))*\w+)(\.dart|\.g\.dart)\s*("|')(\s*;|(\s*as\s*(M\$\w+|\$\w+)\s*;))/gm)
 
     if(allImports !=null && allImports.length > 0){
-      let onlyImports = allImports.filter((importStatement)=>{
-        importStatement = importStatement.trimEnd()
-        if( importStatement.endsWith('";') || importStatement.endsWith("';")){
-          return importStatement;
+      // let onlyImports = allImports.filter((importStatement)=>{
+      //   importStatement = importStatement.trimEnd()
+      //   if( importStatement.endsWith('";') || importStatement.endsWith("';")){
+      //     return importStatement;
   
-        }
-      }   )
+      //   }
+      // }   )
        
-     let customImports = allImports.filter((value)=>{
-        let reg =/^\s*(?:import)\s+(("|')(package:)?((\.*\/)|(\.*\w+\/))*\w+)(\.dart|\.g\.dart)\s*("|')(\s*as\s*(M\$\w+|\$\w+)\s*;)/g
-        let classImports =   value.match(reg)
-        if(classImports!=null && classImports.length > 0) return classImports.flat()
-      }) 
-  
-      console.log(onlyImports);
-      console.log(customImports);
+    //  let imports = allImports.filter((value)=>{
+    //     let classImports =   value.match(/^\s*(?:import)\s+(("|')(package:)?((\.*\/)|(\.*\w+\/))*\w+)(\.dart|\.g\.dart)\s*("|')/g)
+    //     if(classImports!=null && classImports.length > 0) {
+    //        if(classImports[0].trimEnd().endsWith(";")){
+    //         return value
+    //        }else{
+    //         return `${value};`
+    //        }
+    //     }
+   
+    //   }) 
+       
+      generateFileOptions = {...generateFileOptions,[generateFileOptions['imports']]:allImports}
     }else {
       console.log("Null Imports");
     }
-   
+    
+
+
     // get all class in current editor
     let classNamesWithClassKeyWord = editor.match(/class\s*(M)?\$(\w+)/g)
     if (classNamesWithClassKeyWord.length <= 0) rejects("No className or class KeyWord Was Found! (check class Name)")
@@ -61,27 +68,75 @@
         parameters.forEach((parameter)=>{
           let parameterOption = {}
            let types =  parameter.trimStart().split(" ")
+          
            if(types.length === 3){
+            let datatypes = isDataType(types[1])
+            if(datatypes == null) rejects("DataType is not proper")
+            let className;
+            if(!datatypes.inbuilt){
+              className = datatypes.className
+            }
+            console.log(datatypes);
             parameterOption = {
               required: true,
-              dataType: types[1],
-              name:types[2]
+              dataType: datatypes.inbuilt ?  types[1] : datatypes.dataType,
+              name:types[2],
+              ...{className}
             }
            }else if(types.length === 2){
+            let datatypes = isDataType(types[0])
+            if(datatypes == null) rejects("DataType is not proper")
+            let className;
+            if(datatypes.inbuilt){
+              className = datatypes.className
+            }
             parameterOption = {
               required: false,
-              dataType: types[1],
-              name:types[2]
+              dataType: datatypes.inbuilt ?  types[0] : datatypes.dataType,
+              name:types[1],
+              ...{className}
             }
            }else {
             rejects("Parameters are Wrong!")
            }
            options = {...options , parameters : [...options.parameters,parameterOption] }
         })
-        generateFileOptions.push(options)
+        generateFileOptions = {...generateFileOptions ,[generateFileOptions['class']]: options}
     })
      resolve(generateFileOptions)
   })
   return promises;
 
 }
+
+
+const isDataType = (type)=>{
+  if(type == null) return null
+  let myDataType = type.trim().replace("?","")
+  let dataTypes = ["int","String","double","num","bool","dynamic"]
+  if(dataTypes.filter((dataType)=>dataType == myDataType).length > 0)return  {inbuilt:true,dataType:type}
+  if(myDataType.startsWith("List")){
+    myDataType = myDataType.replace("List","").replace("<","").replace(">","")
+    if(dataTypes.filter((dataType)=>dataType == myDataType).length > 0)return  {inbuilt:true,dataType:type}
+    // myDataType = getClassName(myDataType)
+    return {inbuilt:false,dataType:`List<${myDataType}>`,className:myDataType}
+  }else if(myDataType.startsWith("Map")){
+    myDataType = myDataType.replace("Map","").replace("<","").replace(">","")
+    let data = myDataType.split(",")
+    if(data.length == 2){
+      let myDataType = data[1]
+      if(dataTypes.filter((dataType)=>dataType == myDataType).length > 0)return  {inbuilt:true,dataType:type}
+      // myDataType = getClassName(myDataType)
+      return {inbuilt:false,dataType:`Map<${data[0]},${myDataType}>`,className:myDataType}
+    }
+    return null
+  }
+  // type = getClassName(type)
+  return {inbuilt:false,dataType:type,className:type}
+}
+// const getClassName = (str)=>{
+//   if(str === null) return
+//   let classNames =  str.split(".")
+//   if(classNames.length == 2) return classNames[1]
+//   return null
+// }
