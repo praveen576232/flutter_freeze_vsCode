@@ -12,27 +12,15 @@
     let allImports = editor.match(/^\s*(?:import)\s+(("|')(package:)?((\.*\/)|(\.*\w+\/))*\w+)(\.dart|\.g\.dart)\s*("|')(\s*;|(\s*as\s*(M\$\w+|\$\w+)\s*;))/gm)
 
     if(allImports !=null && allImports.length > 0){
-      // let onlyImports = allImports.filter((importStatement)=>{
-      //   importStatement = importStatement.trimEnd()
-      //   if( importStatement.endsWith('";') || importStatement.endsWith("';")){
-      //     return importStatement;
-  
-      //   }
-      // }   )
+       allImports.forEach((imports,index)=>{
+        let filename = imports.match(/((\.*\/)|(\.*\w+\/))*\w+(\.g\.dart)\s*/g)
+        if(filename !=null && filename.length > 0){
+           allImports.splice(index,1)          
+           generateFileOptions = {...generateFileOptions,filename:filename[0].replace(".g.dart",".dart")}
+        }
+       })
        
-    //  let imports = allImports.filter((value)=>{
-    //     let classImports =   value.match(/^\s*(?:import)\s+(("|')(package:)?((\.*\/)|(\.*\w+\/))*\w+)(\.dart|\.g\.dart)\s*("|')/g)
-    //     if(classImports!=null && classImports.length > 0) {
-    //        if(classImports[0].trimEnd().endsWith(";")){
-    //         return value
-    //        }else{
-    //         return `${value};`
-    //        }
-    //     }
-   
-    //   }) 
-       
-      generateFileOptions = {...generateFileOptions,[generateFileOptions['imports']]:allImports}
+      generateFileOptions = {...generateFileOptions,'imports':allImports}
     }else {
       console.log("Null Imports");
     }
@@ -72,21 +60,20 @@
            if(types.length === 3){
             let datatypes = isDataType(types[1])
             if(datatypes == null) rejects("DataType is not proper")
-            let className;
+            let className = null;
             if(!datatypes.inbuilt){
               className = datatypes.className
             }
-            console.log(datatypes);
             parameterOption = {
               required: true,
               dataType: datatypes.inbuilt ?  types[1] : datatypes.dataType,
               name:types[2],
-              ...{className}
+              ...{className,inbuilt:datatypes.inbuilt}
             }
            }else if(types.length === 2){
             let datatypes = isDataType(types[0])
             if(datatypes == null) rejects("DataType is not proper")
-            let className;
+            let className = null;
             if(datatypes.inbuilt){
               className = datatypes.className
             }
@@ -94,14 +81,14 @@
               required: false,
               dataType: datatypes.inbuilt ?  types[0] : datatypes.dataType,
               name:types[1],
-              ...{className}
+              ...{className,inbuilt:datatypes.inbuilt}
             }
            }else {
             rejects("Parameters are Wrong!")
            }
            options = {...options , parameters : [...options.parameters,parameterOption] }
         })
-        generateFileOptions = {...generateFileOptions ,[generateFileOptions['class']]: options}
+        generateFileOptions = {...generateFileOptions , "class" : [...generateFileOptions['class'] || [],options]}
     })
      resolve(generateFileOptions)
   })
@@ -113,15 +100,17 @@
 const isDataType = (type)=>{
   if(type == null) return null
   let myDataType = type.trim().replace("?","")
+  if(myDataType.startsWith("$")){
+    myDataType = myDataType.replace("$","")
+  }
   let dataTypes = ["int","String","double","num","bool","dynamic"]
   if(dataTypes.filter((dataType)=>dataType == myDataType).length > 0)return  {inbuilt:true,dataType:type}
   if(myDataType.startsWith("List")){
-    myDataType = myDataType.replace("List","").replace("<","").replace(">","")
+    myDataType = myDataType.replace("List","").replace("<","").replace(">","").replace("$","")
     if(dataTypes.filter((dataType)=>dataType == myDataType).length > 0)return  {inbuilt:true,dataType:type}
-    // myDataType = getClassName(myDataType)
     return {inbuilt:false,dataType:`List<${myDataType}>`,className:myDataType}
   }else if(myDataType.startsWith("Map")){
-    myDataType = myDataType.replace("Map","").replace("<","").replace(">","")
+    myDataType = myDataType.replace("Map","").replace("<","").replace(">","").replace("$","")
     let data = myDataType.split(",")
     if(data.length == 2){
       let myDataType = data[1]
