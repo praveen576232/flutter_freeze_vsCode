@@ -97,7 +97,7 @@ function isDeepEqualImportRequire(myClass){
   let importStatement;
   for (let index = 0; index < myClass.length; index++) {
     if(myClass[index].parameters != null || myClass[index].parameters.length > 0 ){
-        importStatement =   class.parameters.map((parameter)=>{
+        importStatement =   myClass[index].parameters.map((parameter)=>{
             if(!parameter.inbuilt && parameter.dataType.startsWith("List")){
                 return "import 'package:collection/collection.dart';"
             }
