@@ -16,13 +16,11 @@
         let filename = imports.match(/((\.*\/)|(\.*\w+\/))*\w+(\.g\.dart)\s*/g)
         if(filename !=null && filename.length > 0){
            allImports.splice(index,1)          
-           generateFileOptions = {...generateFileOptions,filename:filename[0].replace(".g.dart",".dart")}
+           generateFileOptions = {...generateFileOptions,filename:filename[0]}
         }
        })
        
       generateFileOptions = {...generateFileOptions,'imports':allImports}
-    }else {
-      console.log("Null Imports");
     }
     
 
@@ -38,6 +36,10 @@
     classNamesWithClassKeyWord.forEach((classNameWithClass, index) => {
       // class
       let className = classNameWithClass.trimStart().replace("class", "").trim()
+      // if filepath is null then class name is the a class name
+      if(generateFileOptions.filename == null){
+        generateFileOptions.filename = `${className.replace("$","").toLowerCase()}.g.dart`
+      }
       let options = {parameters:[]}
       if (className.startsWith("M")) {
         className = className.replace("M$","")
