@@ -1,7 +1,7 @@
 {
   "name": "flutter-freezed",
 	"displayName": "flutter_freezed",
-	"description": "",
+	"description": "generate a File Like a Flutter Freezed Package in Flutter",
 	"version": "0.0.1",
 	"engines": {
 		"vscode": "^1.68.0"
@@ -10,13 +10,13 @@
 		"Other"
 	],
 	"activationEvents": [
-        "onCommand:flutter-freezed.helloWorld"
+        "onCommand:flutter-freezed.flutterFreeze"
 	],
 	"main": "./extension.js",
 	"contributes": {
 		"commands": [{
-            "command": "flutter-freezed.helloWorld",
-            "title": "Hello World"
+            "command": "flutter-freezed.flutterFreeze",
+            "title": "Flutter Freeze"
 
 		}]
 	},
