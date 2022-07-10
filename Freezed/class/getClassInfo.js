@@ -9,18 +9,31 @@
   let promises = new Promise((resolve, rejects) => {
     let generateFileOptions = {}
    
-    let allImports = editor.match(/^\s*(?:import)\s+(("|')(package:)?((\.*\/)|(\.*\w+\/))*\w+)(\.dart|\.g\.dart)\s*("|')(\s*;|(\s*as\s*(M\$\w+|\$\w+)\s*;))/gm)
-
+    let allImports = editor.match(/^\s*(part)\s+("|')(((\.*\/)|(\.*\w+\/))*\w+)(\.g\.dart)\s*("|')(\s*;)/gm)
+  
     if(allImports !=null && allImports.length > 0){
-       allImports.forEach((imports,index)=>{
-        let filename = imports.match(/((\.*\/)|(\.*\w+\/))*\w+(\.g\.dart)\s*/g)
-        if(filename !=null && filename.length > 0){
-           allImports.splice(index,1)          
-           generateFileOptions = {...generateFileOptions,filename:filename[0]}
+      //  allImports.forEach((imports,index)=>{
+      
+        // if(RegExp(/^\s*(part)\s+("|')(((\.*\/)|(\.*\w+\/))*\w+)(\.g\.dart)\s*("|')(\s*;)/g).test(imports))
+        // {
+          let filename  =allImports[0].replace(/^\s*(part)\s+("|')(((\.*\/)|(\.*\w+\/))*\w+)(\.g\.dart)\s*("|')(\s*;)/g,"\$3\$7")
+        if(filename !=null && filename!=""){
+      
+          generateFileOptions = {...generateFileOptions,filename:filename}
+          
+        }else{
+          rejects("file Name not Found! please Follow the Rules. (Example: part 'fileName.g.dart');")
+
         }
-       })
+        // allImports.splice(index,1)  
+      // }
+
        
-      generateFileOptions = {...generateFileOptions,'imports':allImports}
+      //  })
+       
+      // generateFileOptions = {...generateFileOptions,'imports':allImports}
+    }else {
+      rejects("file Name not Found! please Follow the Rules. (Example: part 'fileName.g.dart');")
     }
     
 
@@ -92,6 +105,7 @@
         })
         generateFileOptions = {...generateFileOptions , "class" : [...generateFileOptions['class'] || [],options]}
     })
+   
      resolve(generateFileOptions)
   })
   return promises;
