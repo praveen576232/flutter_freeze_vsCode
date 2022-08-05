@@ -1,8 +1,17 @@
 {
   "name": "flutter-freezed",
 	"displayName": "flutter_freezed",
-	"description": "generate a File Like a Flutter Freezed Package in Flutter",
+	"description": "code generator for data-classes/pattern-matching/cloning for flutter dart",
 	"version": "0.0.1",
+	"repository": {
+		"type": "git",
+		"url": "https://github.com/praveen576232/flutter_freeze_vsCode"
+	},
+	"bugs": {
+		"url": "https://github.com/praveen576232/flutter_freeze_vsCode/issues"
+	},
+	"publisher": "praveend",
+	"icon": "screenshots/dart.png",
 	"engines": {
 		"vscode": "^1.68.0"
 	},
